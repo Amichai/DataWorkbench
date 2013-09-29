@@ -1,0 +1,201 @@
+﻿@{
+    ViewBag.Title = "Home Page";
+}
+<script src="~/Scripts/d3.v3.js"></script>
+
+<style>
+    .panel-group {
+        margin-bottom: 20px;
+    }
+
+
+
+    .axis path,
+    .axis line {
+        fill: none;
+        stroke: #000;
+        shape-rendering: crispEdges;
+    }
+
+    .bar {
+        fill: steelblue;
+    }
+
+    .x.axis path {
+        display: none;
+    }
+</style>
+
+
+<script>
+    function load() {
+        //if (event.keyCode != 13) {
+        //    return;
+        //}
+        debugger;
+        var encoded = encodeURIComponent($('#dataBox').val());
+        $.ajax({
+            url: '@Url.Action("Load")' + '?inputText=' + encoded,
+            type: 'POST',
+        }).done(function (data) {
+            $('#dataResult').append($("<div style='padding:10px;word-wrap:break-word;white-space:pre;'/>").text(data));
+        });
+    }
+
+    function query() {
+        var encoded = encodeURIComponent($('#queryBox').val());
+        $.ajax({
+            url: '@Url.Action("Query")' + '?queryText=' + encoded,
+            type: 'POST',
+        }).done(function (data) {
+            if (!$('#collapseTwo').hasClass('in')) {
+                $("#collapse2").click();
+            }
+            try {
+                debugger;
+                var asJson = JSON.parse(data);
+                if (asJson["Chart"] != undefined) {
+                    loadChart(asJson["Chart"]);
+                } else {
+                    $('#queryResult').html($("<div style='padding:10px;word-wrap:break-word;white-space:pre;'/>").text(data));
+                }
+            } catch (e) {
+                $('#queryResult').html($("<div style='padding:10px;word-wrap:break-word;white-space:pre;'/>").text(data));
+
+            }
+        });
+    }
+
+    var x;
+    var y;
+    var xAxis;
+    var yAxis;
+    var svg;
+    var margin;
+    var width;
+    var height;
+
+    function loadChart(data) {
+        margin = { top: 20, right: 20, bottom: 30, left: 40 },
+width = 960 - margin.left - margin.right,
+height = 500 - margin.top - margin.bottom;
+
+        x = d3.scale.ordinal()
+            .rangeRoundBands([0, width], .1);
+
+        y = d3.scale.linear()
+            .range([height, 0]);
+
+        xAxis = d3.svg.axis()
+            .scale(x)
+            .orient("bottom");
+
+        yAxis = d3.svg.axis()
+            .scale(y)
+            .orient("left")
+            //.tickFormat(formatPercent)
+        ;
+        svg = d3.select('#queryResult').append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+          .append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+        x.domain(data.map(function (d) { return d.x; }));
+        y.domain([0, d3.max(data, function (d) { return d.y; })]);
+
+        svg.append("g")
+            .attr("class", "x axis")
+            .attr("transform", "translate(0," + height + ")")
+            .call(xAxis);
+
+        svg.append("g")
+            .attr("class", "y axis")
+            .call(yAxis)
+          .append("text")
+            .attr("transform", "rotate(-90)")
+            .attr("y", 6)
+            .attr("dy", ".71em")
+            .style("text-anchor", "end");
+
+        svg.selectAll(".bar")
+            .data(data)
+          .enter().append("rect")
+            .attr("class", "bar")
+            .attr("x", function (d) { return x(d.x); })
+            .attr("width", x.rangeBand())
+            .attr("y", function (d) { return y(d.y); })
+            .attr("height", function (d) { return height - y(d.y); });
+
+    };
+
+    function type(d) {
+        d.y = +d.y;
+        return d;
+    }
+
+
+
+</script>
+
+
+
+<h1>Data</h1>
+<div class="panel-group" id="accordion">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <div class="row">
+                <div class="col-md-8">
+                    <input type="text" class="form-control" id="dataBox">
+                    @*onkeydown="load()"*@
+                </div>
+                <div class="col-md-1">
+                    <button type="button" class="btn btn-default" onclick="load()">Load</button>
+                </div>
+                <h4 class="panel-title col-md-1">
+                    <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion" href="#collapseOne">Collapse
+                    </a>
+                </h4>
+            </div>
+
+        </div>
+        <div id="collapseOne" class="panel-collapse collapse in">
+            <div class="panel-body" id="dataResult">
+            </div>
+        </div>
+    </div>
+</div>
+
+<h1>Query</h1>
+
+<div class="panel-group" id="accordion2">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <div class="row">
+                <div class="col-md-8">
+                    <input type="text" class="form-control" id="queryBox">
+                    @*onkeydown="query()"*@
+                </div>
+                <div class="col-md-1">
+                    <button type="button" class="btn btn-default" onclick="query()">Query</button>
+                </div>
+
+                <h4 class="panel-title col-md-2">
+                    <a class="accordion-toggle" data-toggle="collapse"
+                        href="#collapseTwo"
+                        id="collapse2"
+                        data-parent="#accordion2">Collapse</a>
+                </h4>
+            </div>
+        </div>
+        <div id="collapseTwo" class="panel-collapse collapse">
+            <div class="panel-body" id="queryResult">
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="chart">
+    @* style="width:100px;height:200px"*@
+
+</div>

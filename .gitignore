@@ -1,0 +1,10 @@
+DataConsole/bin/
+DataConsole/obj/
+DataLibrary/bin/
+DataLibrary/obj
+DataWeb/bin/
+DataWeb/obj/
+DataWorkbench/bin/
+DataWorkbench/obj/
+packages
+*.suo

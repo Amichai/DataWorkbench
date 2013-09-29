@@ -1,0 +1,8 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Sources>
+  <Source>
+    https://explore.data.gov/resource/veterans-burial-sites.json
+  </Source>
+  <Source>https://google.com</Source>
+  <Source>..\..\DataSources.xml</Source>
+</Sources>
